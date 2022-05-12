@@ -1,0 +1,4 @@
+GeotechnicalUnit,UnitWeight,Sigci,mi,GSI,FullyDistD,UndisturbedLimit_m,FullyDisturbedLimit_m,OverallSlopeAngle_deg,SaturationRatio,color,,,,,,,,,,,,
+example_rock_1,0.027,55,14,60,1,150,15,30,0,xkcd:emerald green,,,,,,,,,,,,
+example_rock_2,0.027,35,14,35,1,150,15,30,0,xkcd:orange,,,,,,,,,,,,
+example_rock_3,0.028,75,9,55,1,150,15,30,0,xkcd:light purple,,,,,,,,,,,,
