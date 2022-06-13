@@ -20,9 +20,9 @@ import matplotlib_inline
 warnings.filterwarnings("ignore", message="invalid value encountered in")
 
 # filepaths
-INPUT_PATH = r'C:\Users\jdanielson\OneDrive - BGC Engineering Inc\Local Work\030 SS2022 paper\inputs_paper.csv'
-OUTPUT_PATH = r'C:\Users\jdanielson\OneDrive - BGC Engineering Inc\Local Work\030 SS2022 paper\Outputs\00 test\\'
-MODE = "GALLANT" # options are "ROSE" "LINEAR" "GALLANT"
+INPUT_PATH = r'C:\Users\jdanielson\OneDrive - BGC Engineering Inc\Local Work\030 SS2022 paper\example_inputs.csv'
+OUTPUT_PATH = r'C:\Users\jdanielson\OneDrive - BGC Engineering Inc\Local Work\030 SS2022 paper\Outputs\\'
+MODE = "ROSE" # options are "ROSE" "LINEAR" "GALLANT"
 
 # plotting parameters
 matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -124,10 +124,10 @@ def est_sig3_at_depth(params, depth, disturb, sig_3):
 
     """
     unit_weight = params['UnitWeight']
-    cos_alpha = np.cos(np.radians(unit_df.OverallSlopeAngle_deg))
+    cos_alpha = np.cos(np.radians(params.OverallSlopeAngle_deg))
 
     sat_constant = 1-params.SaturationRatio * \
-        0.009807/(unit_weight*cos_alpha)
+        0.009807/(unit_weight*cos_alpha**2)
 
     _, hb_normal = hb_to_shear_normal(params, sig_3, disturb)
     stress_df = pd.DataFrame(data=hb_normal, columns=['normal'])
@@ -135,13 +135,10 @@ def est_sig3_at_depth(params, depth, disturb, sig_3):
 
     norm_at_limit = depth*unit_weight*cos_alpha**2*sat_constant
 
-    # ind = stress_df['normal'].sub(norm_at_limit).abs().idxmin()
-    ind = stress_df['normal'].sub(norm_at_limit).abs().nsmallest(2)
-    ind = ind.index.values
-
     # interpolate between sigma 3 values assoc. with the normal stress depth
-    s3_at_depth = sig_3[ind[0]]+(norm_at_limit-hb_normal[ind[0]]) * \
-        (sig_3[ind[1]]-sig_3[ind[0]])/(hb_normal[ind[1]]-hb_normal[ind[0]])
+    stress_df = stress_df.dropna(subset=['normal'])
+    s3_at_depth = np.interp(norm_at_limit,stress_df['normal'],stress_df['sigma_3'])
+
     return s3_at_depth
 
 
@@ -222,7 +219,7 @@ def plot_disturbance_limits(unit_params, axis):
     cos_alpha = np.cos(np.radians(unit_params.OverallSlopeAngle_deg))
 
     sat_constant = 1-unit_params.SaturationRatio * \
-        0.009807/(unit_weight*cos_alpha)
+        0.009807/(unit_weight*cos_alpha**2)
 
     norm_at_limit = udl*unit_weight*cos_alpha**2*sat_constant
     axis.axvline(norm_at_limit, color="k",
